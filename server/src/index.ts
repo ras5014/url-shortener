@@ -5,6 +5,7 @@ import helmet from "helmet";
 import cors from "cors";
 import { notFoundHandler } from "./middlewares/notFound";
 import { errorHandler } from "./middlewares/errorHandler";
+import { connectToMongoDB } from "./config/mongoClient";
 
 const app = express();
 
@@ -44,11 +45,17 @@ app.use(notFoundHandler);
 
 const PORT = process.env.PORT || 8080;
 
-app
-  .listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  })
-  .on("error", (err) => {
-    console.error("Error starting server:", err);
-    process.exit(1);
-  });
+const server = async () => {
+  // Connect to MongoDB
+  await connectToMongoDB();
+  app
+    .listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    })
+    .on("error", (err) => {
+      console.error("Error starting server:", err);
+      process.exit(1);
+    });
+};
+
+server();
