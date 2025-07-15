@@ -6,6 +6,7 @@ import cors from "cors";
 import { notFoundHandler } from "./middlewares/notFound";
 import { errorHandler } from "./middlewares/errorHandler";
 import { connectToMongoDB } from "./config/mongoClient";
+import urlRoute from "./routes/url.route";
 
 const app = express();
 
@@ -37,6 +38,9 @@ app.use(
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
+
+// Routes
+app.use("/api/v1/url", urlRoute);
 
 // Error handling middleware
 app.use(errorHandler);
