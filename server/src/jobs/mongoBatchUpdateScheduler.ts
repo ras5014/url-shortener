@@ -9,7 +9,19 @@ export const schedule = () => {
     logger.info("MongoDB Batch Update Scheduler running...");
     try {
       // Batch Update MongoDB data here
-      const keys = await redisClient.keys("pending_updates:*");
+      let cursor = "0";
+      let keys: string[] = [];
+      do {
+        const [nextCursor, foundKeys] = await redisClient.scan(
+          cursor,
+          "MATCH",
+          "pending_updates:*",
+          "COUNT",
+          "100"
+        );
+        cursor = nextCursor;
+        keys = keys.concat(foundKeys);
+      } while (cursor !== "0");
       console.log("Pending updates keys:", keys);
 
       if (keys.length === 0) {
@@ -28,8 +40,8 @@ export const schedule = () => {
             timestamp: new Date(timestamp),
           };
         });
-        if (pendingUpdates.length == 0) return;
-        console.log("Visit History:", visitHistoryEntries);
+        if (pendingUpdates.length == 0) continue;
+        logger.info("Visit History:", visitHistoryEntries);
         bulkOps.push({
           updateOne: {
             filter: { shortId: key.split(":")[1] },
@@ -43,14 +55,16 @@ export const schedule = () => {
           },
         });
         keysToDelete.push(key);
+      }
 
-        // Execute the bulk update Operation
+      // Execute the bulk update Operation once after accumulating all operations
+      if (bulkOps.length > 0) {
         await UrlModel.bulkWrite(bulkOps);
+      }
 
-        // Clean up the Redis key after processing
-        if (keysToDelete.length > 0) {
-          await redisClient.del(...keysToDelete);
-        }
+      // Clean up the Redis keys after processing
+      if (keysToDelete.length > 0) {
+        await redisClient.del(...keysToDelete);
       }
     } catch (error) {
       logger.error("Error in MongoDB Batch Update Scheduler:", error);
