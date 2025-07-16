@@ -36,7 +36,7 @@ app.use(
 );
 
 // Crons
-schedule();
+// schedule(); // Moved inside server function after DB connection
 
 // Routes middlewares
 app.get("/", (req, res) => {
@@ -56,6 +56,10 @@ const PORT = process.env.PORT || 8080;
 const server = async () => {
   // Connect to MongoDB
   await connectToMongoDB();
+
+  // Start scheduled jobs after DB connection
+  schedule();
+
   app
     .listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);

@@ -5,7 +5,7 @@ import { UrlModel } from "../models/url";
 
 // CRON jobs
 export const schedule = () => {
-  cron.schedule("* * * * * *", async () => {
+  cron.schedule("* * * * *", async () => {
     logger.info("MongoDB Batch Update Scheduler running...");
     try {
       // Batch Update MongoDB data here
@@ -22,7 +22,7 @@ export const schedule = () => {
         cursor = nextCursor;
         keys = keys.concat(foundKeys);
       } while (cursor !== "0");
-      console.log("Pending updates keys:", keys);
+      logger.info("Pending updates keys:", keys);
 
       if (keys.length === 0) {
         logger.info("No pending updates to process.");

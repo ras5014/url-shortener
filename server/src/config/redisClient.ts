@@ -3,7 +3,7 @@ import logger from "../utils/logger";
 
 export const redisClient = new Redis({
   host: process.env.REDIS_HOST,
-  port: parseInt(process.env.REDIS_PORT!),
+  port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379,
 });
 redisClient.on("connect", () => {
   logger.info("Connected to Redis");
