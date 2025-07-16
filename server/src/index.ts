@@ -7,6 +7,7 @@ import { notFoundHandler } from "./middlewares/notFound";
 import { errorHandler } from "./middlewares/errorHandler";
 import { connectToMongoDB } from "./config/mongoClient";
 import urlRoute from "./routes/url.route";
+import { schedule } from "./jobs/mongoBatchUpdateScheduler";
 
 const app = express();
 
@@ -33,6 +34,9 @@ app.use(
     },
   })
 );
+
+// Crons
+schedule();
 
 // Routes middlewares
 app.get("/", (req, res) => {

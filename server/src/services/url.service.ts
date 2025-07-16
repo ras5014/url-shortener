@@ -29,7 +29,8 @@ export const getShortUrl = async (data: { shortId: string }) => {
   if (cachedUrl) {
     logger.info(`Retrieved URL from cache for shortId: ${data.shortId}`);
     const parsedUrl = JSON.parse(cachedUrl);
-    parsedUrl.visitHistory.push({ timestamp: new Date() });
+    const timestamp = new Date();
+    parsedUrl.visitHistory.push({ timestamp });
     // Update the cached URL in Redis
     await redisClient.set(
       data.shortId,
@@ -38,8 +39,14 @@ export const getShortUrl = async (data: { shortId: string }) => {
       60 * 60 * 24
     ); // Cache for 24 hours
 
-    // Update the URL in the mongo database
-    
+    // Update the URL visit history in the mongo database process
+    // Store pending update in Redis Set (more efficient than array)
+    await redisClient.sadd(
+      `pending_updates:${data.shortId}`,
+      timestamp.toISOString()
+    );
+    await redisClient.expire(`pending_updates:${data.shortId}`, 60 * 60); // Cache for 1 hours
+
     return parsedUrl.redirectUrl;
   }
   const url = await UrlModel.findOneAndUpdate(
