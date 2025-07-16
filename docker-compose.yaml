@@ -5,6 +5,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
+    container_name: server
     ports:
       - "8080:8080"
     environment:
@@ -28,6 +29,16 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  redis:
+    image: redis/redis-stack:latest
+    ports:
+      - "6379:6379" # Redis server
+      - "8001:8001" # RedisInsight UI
+    volumes:
+      - redis_data:/data
+
 volumes:
   mongo_data:
+    driver: local
+  redis_data:
     driver: local

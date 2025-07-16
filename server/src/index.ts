@@ -7,6 +7,7 @@ import { notFoundHandler } from "./middlewares/notFound";
 import { errorHandler } from "./middlewares/errorHandler";
 import { connectToMongoDB } from "./config/mongoClient";
 import urlRoute from "./routes/url.route";
+import { schedule } from "./jobs/mongoBatchUpdateScheduler";
 
 const app = express();
 
@@ -34,6 +35,9 @@ app.use(
   })
 );
 
+// Crons
+// schedule(); // Moved inside server function after DB connection
+
 // Routes middlewares
 app.get("/", (req, res) => {
   res.send("Hello, World!");
@@ -52,6 +56,10 @@ const PORT = process.env.PORT || 8080;
 const server = async () => {
   // Connect to MongoDB
   await connectToMongoDB();
+
+  // Start scheduled jobs after DB connection
+  schedule();
+
   app
     .listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
