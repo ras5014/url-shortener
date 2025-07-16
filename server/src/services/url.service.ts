@@ -38,3 +38,15 @@ export const getShortUrl = async (data: { shortId: string }) => {
   );
   return url.redirectUrl;
 };
+
+export const getAnalytics = async (data: { shortId: string }) => {
+  const url = await UrlModel.findOne({ shortId: data.shortId });
+  if (!url) {
+    logger.error(`Short URL with ID ${data.shortId} not found for analytics`);
+    throw new Error("Short URL not found");
+  }
+  return {
+    shortId: url.shortId,
+    totalVisits: url.visitHistory?.length || 0,
+  };
+};

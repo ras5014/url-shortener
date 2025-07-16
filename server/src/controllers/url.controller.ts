@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { generateShortUrl, getShortUrl } from "../services/url.service";
+import {
+  generateShortUrl,
+  getShortUrl,
+  getAnalytics,
+} from "../services/url.service";
 import { successResponse, errorResponse } from "../utils/responses";
 
 export const generateShortUrlController = async (
@@ -22,5 +26,15 @@ export const getShortUrlController = async (req: Request, res: Response) => {
     res.redirect(redirectUrl);
   } catch (error) {
     errorResponse(res, "Failed to retrieve short URL", 404);
+  }
+};
+
+export const getAnalyticsController = async (req: Request, res: Response) => {
+  try {
+    const { shortId } = req.params;
+    const analytics = await getAnalytics({ shortId });
+    successResponse(res, "Analytics retrieved successfully", analytics, 200);
+  } catch (error) {
+    errorResponse(res, "Failed to retrieve analytics", 404);
   }
 };
